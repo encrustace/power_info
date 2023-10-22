@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:power_info/model/key_value_model.dart';
+import 'package:power_info/provider.dart';
+import 'package:provider/provider.dart';
 import 'package:upower/upower.dart';
 
 class BatteryDetails extends StatefulWidget {
@@ -11,12 +13,11 @@ class BatteryDetails extends StatefulWidget {
 
 class _BatteryDetailsState extends State<BatteryDetails> {
   List<KeyValueModel> dataList = [];
+  late RootProvider provider;
 
   Future<void> getBattery() async {
-    var client = UPowerClient();
-    await client.connect();
-    UPowerDevice device = client.devices[0];
-    dataList.add(KeyValueModel("UPower Version", client.daemonVersion));
+    UPowerDevice device = provider.getSelectedBattery();
+    dataList.add(KeyValueModel("UPower Version", device.vendor));
     dataList.add(
       KeyValueModel(
         "Vendor",
@@ -120,33 +121,39 @@ class _BatteryDetailsState extends State<BatteryDetails> {
     // List<UPowerDeviceStatisticsRecord> x =
     //     await device.getStatistics("charging");
     // print(x);
-    client.close();
     setState(() {});
   }
 
   @override
   void initState() {
+    provider = Provider.of<RootProvider>(context, listen: false);
     getBattery();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: GridView.count(
-        primary: false,
-        padding: const EdgeInsets.all(20),
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        crossAxisCount: 3,
-        children: dataList
-            .map(
-              (item) => KeyValueWidget(label: item.key, value: item.value),
-            )
-            .toList(),
-      ),
-    );
+    if (dataList.isNotEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        child: GridView.count(
+          primary: false,
+          padding: const EdgeInsets.all(20),
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          crossAxisCount: 3,
+          children: dataList
+              .map(
+                (item) => KeyValueWidget(label: item.key, value: item.value),
+              )
+              .toList(),
+        ),
+      );
+    } else {
+      return const Center(
+        child: Text("Please select battery"),
+      );
+    }
   }
 }
 

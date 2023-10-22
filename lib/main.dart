@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:adwaita/adwaita.dart';
 import 'package:flutter/material.dart';
 import 'package:power_info/home_page.dart';
+import 'package:power_info/provider.dart';
+import 'package:provider/provider.dart';
 import 'package:window_size/window_size.dart';
 
 void main() {
@@ -10,7 +12,12 @@ void main() {
     setWindowMinSize(const Size(900, 600));
     setWindowMaxSize(Size.infinite);
   }
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => RootProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
